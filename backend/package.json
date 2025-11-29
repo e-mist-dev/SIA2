@@ -4,10 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
+    "dev": "node init && nodemon server.js",
+    "start": "node init && node server.js",
     "lint": "eslint",
-    "build": "npm run lint"
+    "build": "node init && npm run lint"
   },
   "keywords": [],
   "author": "",
