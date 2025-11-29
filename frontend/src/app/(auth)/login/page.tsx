@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const { showNotification } = useNotification();
 
-  const handlePasswordLogin = async (e: FormEvent) => {
+    const handlePasswordLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -35,10 +35,13 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, username, password);
       showNotification("Logged in successfully", "success");
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message =
+        err instanceof Error ? err.message : "Failed to login.";
+
       showNotification("Invalid email or password", "error");
-      setError(err.message || "Failed to login.");
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -52,7 +55,6 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Optional: send idToken to backend for googleAuth controller
       const idToken = await result.user.getIdToken();
       await fetch(`${API_BASE}/api/auth/google`, {
         method: "POST",
@@ -61,13 +63,16 @@ export default function LoginPage() {
       });
       showNotification("Logged in successfully", "success");
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Google sign in failed.");
+      const message =
+        err instanceof Error ? err.message : "Google sign in failed.";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div style={styles.page}>

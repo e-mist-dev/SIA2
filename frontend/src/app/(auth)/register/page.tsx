@@ -20,7 +20,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const sendOtp = async () => {
+    const sendOtp = async () => {
     if (!email) {
       setError("Enter your email first.");
       return;
@@ -46,7 +46,7 @@ export default function RegisterPage() {
       setOtpStep("sent");
       setMessage("OTP sent to your email.");
       showNotification("OTP sent to your email", "info");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("Error sending OTP.");
       showNotification("Error sending OTP", "error");
@@ -55,7 +55,8 @@ export default function RegisterPage() {
     }
   };
 
-  const verifyOtp = async () => {
+
+   const verifyOtp = async () => {
     if (!otp) {
       setError("Enter the OTP.");
       return;
@@ -88,14 +89,19 @@ export default function RegisterPage() {
 
       showNotification("Registered successfully", "success");
       router.push("/login");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Error verifying OTP / setting password.");
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Error verifying OTP / setting password.";
+      setError(message);
       showNotification("Error verifying OTP / setting password", "error");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div style={styles.page}>
