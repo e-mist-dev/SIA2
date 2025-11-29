@@ -1,0 +1,83 @@
+name: CI – CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      # ---------- FRONTEND (Next.js) ----------
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Test frontend
+        working-directory: frontend
+        run: npm test --if-present
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      # ---------- BACKEND (Express) ----------
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+
+      - name: Lint backend
+        working-directory: backend
+        run: npm run lint
+
+      - name: Test backend
+        working-directory: backend
+        run: npm test --if-present
+
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+
+      # ---------- COLLECT BUILDS INTO dist/ ----------
+      - name: Prepare dist folder
+        run: |
+          rm -rf dist
+          mkdir -p dist/frontend dist/backend
+
+      # copy frontend build (adjust if you use `next export`)
+      - name: Copy frontend build to dist
+        run: |
+          cp -R frontend/.next dist/frontend/.next
+          cp -R frontend/public dist/frontend/public
+          cp frontend/package.json dist/frontend/package.json
+
+      # copy backend app to dist
+      - name: Copy backend to dist
+        run: |
+          cp -R backend/* dist/backend/
+
+      # optional: upload dist as build artifact
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sia2-build
+          path: dist
